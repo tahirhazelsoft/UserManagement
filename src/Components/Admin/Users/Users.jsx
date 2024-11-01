@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import AddUser from "./Modal/AddUser";
 import { deleteUser, searchUser } from "../../../features/Users/userSlice";
 import FilteredUser from "./FilteredUser/FilteredUser";
+import { Link } from "react-router-dom";
 
 function Users() {
   const dispatch = useDispatch();
@@ -14,6 +15,11 @@ function Users() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sortedUsers, setSortedUsers] = useState(users);
+  const [monitorUsers, setMonitorUsers] = useState({
+    start: 0,
+    end: 5,
+  });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -24,12 +30,16 @@ function Users() {
       } else {
         dispatch(searchUser(""));
       }
-    }, 300); 
+    }, 300);
 
     return () => {
-      clearTimeout(handler); 
+      clearTimeout(handler);
     };
   }, [search, dispatch]);
+
+  useEffect(() => {
+    setSortedUsers(users);
+  }, [users]);
 
   const handleShowPassword = (id) => {
     setShowPasswordId((prevId) => (prevId === id ? null : id));
@@ -61,6 +71,35 @@ function Users() {
     }
   };
 
+  const handleSortAscending = () => {
+    console.log("Sorting in ascending order, please wait");
+    const sorted = [...users].sort((a, b) => a.id - b.id);
+    setSortedUsers(sorted);
+    console.log(sorted);
+  };
+
+  const handleSortDescending = () => {
+    console.log("Sorting in descending order, please wait");
+    const sorted = [...users].sort((a, b) => b.id - a.id);
+    setSortedUsers(sorted);
+    console.log(sorted);
+  };
+
+  const handleNext = () => {
+    setMonitorUsers({
+      start: monitorUsers.start + 5,
+      end: monitorUsers.end + 5,
+    });
+    console.log(monitorUsers.end, users.length)
+  };
+
+  const handlePrevious = () => {
+    setMonitorUsers({
+      start: monitorUsers.start - 5 < 0 ? 0 : monitorUsers.start - 5,
+      end: monitorUsers.end - 5 < 5 ? 5 : monitorUsers.end - 5,
+    });
+  };
+
   return (
     <section className="users">
       <header className="text-center mt-2">
@@ -69,20 +108,51 @@ function Users() {
       <hr />
       <main className="d-flex flex-column">
         <div className="add-button w-100 text-end d-flex justify-content-center gap-2 flex-sm-row flex-column justify-content-sm-end ">
-          <div className="search d-flex">
+          <div className="search d-flex justify-content-end">
             <input
               type="text"
               placeholder="Search User"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleKeyDown} 
+              onKeyDown={handleKeyDown}
             />
             <button
-              className={`searchBtn ${search ? '' : 'd-none'}`}
+              className={`searchBtn ${search ? "" : "d-none"}`}
               onClick={clearSearch}
             >
               Clear
             </button>
+          </div>
+          <div className="filter">
+            <div className="dropdown">
+              <button
+                className=" dropdown-toggle"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Filter
+              </button>
+
+              <ul className="dropdown-menu">
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={handleSortAscending}
+                  >
+                    Sort in ascending
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={handleSortDescending}
+                  >
+                    Sort in descending
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
           <div className="add-user">
             <button
@@ -98,16 +168,25 @@ function Users() {
           <div className="loading">Loading...</div>
         ) : (
           <FilteredUser
-            users={search ? searchedUsers : users}
+            users={
+              search
+                ? searchedUsers
+                : sortedUsers.slice(monitorUsers.start, monitorUsers.end)
+            }
             showPasswordId={showPasswordId}
             handleShowPassword={handleShowPassword}
             handleDelete={handleDelete}
             handleUpdate={handleUpdate}
           />
         )}
+        <div className="pagination">
+          <button onClick={handlePrevious} disabled={monitorUsers.start === 0}>
+            Previous
+          </button>
+          <button onClick={handleNext} disabled={monitorUsers.end > users.length}>Next</button>
+        </div>
       </main>
 
-      {/* Modal Here */}
       <AddUser id={"addUserModal"} mode={"add"} onSave={saveUser} />
 
       <AddUser
