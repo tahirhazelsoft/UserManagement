@@ -219,7 +219,7 @@ function Users() {
                 setActivePage(allPages);
               }}
             >
-              Last page
+              {allPages}
             </button>
           </div>
           <button
