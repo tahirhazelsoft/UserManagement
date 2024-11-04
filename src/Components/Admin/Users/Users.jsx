@@ -1,52 +1,66 @@
 import React, { useState, useEffect } from "react";
 import "../CSS/Admin.css";
-import { useDispatch, useSelector } from "react-redux";
 import AddUser from "./Modal/AddUser";
-import { deleteUser, searchUser } from "../../../features/Users/userSlice";
 import FilteredUser from "./FilteredUser/FilteredUser";
+import {
+  fetchUsers,
+  deleteUser,
+  updateUser,
+  addUser,
+} from "../../../Services/UserService";
 import { Link } from "react-router-dom";
 
 function Users() {
-  const dispatch = useDispatch();
-  const users = useSelector((state) => state.users.users);
-  const searchedUsers = useSelector((state) => state.users.searchResult);
+  const [users, setUsers] = useState([]);
+  const [searchedUsers, setSearchedUsers] = useState([]);
   const [user, setUser] = useState(null);
   const [showPasswordId, setShowPasswordId] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sortedUsers, setSortedUsers] = useState(users);
+  const [sortedUsers, setSortedUsers] = useState([]);
   const [monitorUsers, setMonitorUsers] = useState({
     start: 0,
     end: 5,
   });
+  const [activePage, setActivePage] = useState(1);
+  const allPages = Math.round(users.length / 5);
+
+  console.log(allPages);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      if (search) {
-        setLoading(true);
-        dispatch(searchUser(search));
-        setLoading(false);
-      } else {
-        dispatch(searchUser(""));
-      }
-    }, 300);
+    handleFetchUsers();
+  }, []);
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [search, dispatch]);
-
-  useEffect(() => {
+  const handleFetchUsers = async () => {
+    setLoading(true);
+    const users = await fetchUsers();
+    setUsers(users);
     setSortedUsers(users);
-  }, [users]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (search) {
+      setLoading(true);
+      const filtered = users.filter((user) =>
+        user.firstName.toLowerCase().includes(search.toLowerCase())
+      );
+      setSearchedUsers(filtered);
+      setLoading(false);
+    } else {
+      setSearchedUsers([]);
+    }
+  }, [search, users]);
 
   const handleShowPassword = (id) => {
     setShowPasswordId((prevId) => (prevId === id ? null : id));
   };
 
-  const handleDelete = (id) => {
-    dispatch(deleteUser(id));
+  const handleDelete = async (id) => {
+    await deleteUser(id);
+    setUsers(users.filter((user) => user.id !== id));
+    setSortedUsers(users.filter((user) => user.id !== id));
   };
 
   const handleUpdate = (id) => {
@@ -55,34 +69,34 @@ function Users() {
     setIsUpdating(true);
   };
 
-  const saveUser = () => {
+  const saveUser = async (newUser, mode) => {
+    if (mode === "update") {
+      const updatedUser = await updateUser(newUser);
+      setUsers(users.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+      setSortedUsers(
+        users.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+    } else {
+      const addedUser = await addUser(newUser);
+      setUsers([addedUser, ...users]);
+      setSortedUsers([addedUser, ...users]);
+    }
     setUser(null);
     setIsUpdating(false);
   };
 
   const clearSearch = () => {
     setSearch("");
-    dispatch(searchUser(""));
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      clearSearch();
-    }
   };
 
   const handleSortAscending = () => {
-    console.log("Sorting in ascending order, please wait");
     const sorted = [...users].sort((a, b) => a.id - b.id);
     setSortedUsers(sorted);
-    console.log(sorted);
   };
 
   const handleSortDescending = () => {
-    console.log("Sorting in descending order, please wait");
     const sorted = [...users].sort((a, b) => b.id - a.id);
     setSortedUsers(sorted);
-    console.log(sorted);
   };
 
   const handleNext = () => {
@@ -90,7 +104,7 @@ function Users() {
       start: monitorUsers.start + 5,
       end: monitorUsers.end + 5,
     });
-    console.log(monitorUsers.end, users.length)
+    setActivePage((pre) => pre + 1);
   };
 
   const handlePrevious = () => {
@@ -98,6 +112,7 @@ function Users() {
       start: monitorUsers.start - 5 < 0 ? 0 : monitorUsers.start - 5,
       end: monitorUsers.end - 5 < 5 ? 5 : monitorUsers.end - 5,
     });
+    setActivePage((pre) => pre - 1);
   };
 
   return (
@@ -114,7 +129,6 @@ function Users() {
               placeholder="Search User"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleKeyDown}
             />
             <button
               className={`searchBtn ${search ? "" : "d-none"}`}
@@ -159,6 +173,7 @@ function Users() {
               className="add-user"
               data-bs-toggle="modal"
               data-bs-target="#addUserModal"
+              onClick={() => setIsUpdating(false)}
             >
               Add User
             </button>
@@ -183,12 +198,40 @@ function Users() {
           <button onClick={handlePrevious} disabled={monitorUsers.start === 0}>
             Previous
           </button>
-          <button onClick={handleNext} disabled={monitorUsers.end > users.length}>Next</button>
+          <div className="pages">
+            <button
+              className="FirstPage"
+              onClick={() => {
+                setMonitorUsers({ start: 0, end: 5 });
+                setActivePage(1);
+              }}
+            >
+              1
+            </button>
+            <button className="ActivePage">{activePage}</button>
+            <button
+              className="LastPage"
+              onClick={() => {
+                setMonitorUsers({
+                  start: Math.floor(users.length / 5) * 5,
+                  end: users.length,
+                });
+                setActivePage(allPages);
+              }}
+            >
+              Last page
+            </button>
+          </div>
+          <button
+            onClick={handleNext}
+            disabled={monitorUsers.end > users.length}
+          >
+            Next
+          </button>
         </div>
       </main>
 
       <AddUser id={"addUserModal"} mode={"add"} onSave={saveUser} />
-
       <AddUser
         id={"updateUserModal"}
         singleuser={user}

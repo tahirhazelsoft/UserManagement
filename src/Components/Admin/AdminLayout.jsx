@@ -5,15 +5,15 @@ import Aside from "./Aside/Aside";
 import "./CSS/Admin.css";
 
 function AdminLayout() {
-  const navigate = useNavigate();
-  const authenticatedUser = useSelector((state) => state.users.LoggedInUser);
+  // const navigate = useNavigate();
+  // const authenticatedUser = useSelector((state) => state.users.LoggedInUser);
 
  
-  useEffect(() => {
-    if (!authenticatedUser || authenticatedUser.length === 0) {
-      navigate("/"); 
-    }
-  }, [authenticatedUser, navigate]); 
+  // useEffect(() => {
+  //   if (!authenticatedUser || authenticatedUser.length === 0) {
+  //     navigate("/"); 
+  //   }
+  // }, [authenticatedUser, navigate]); 
 
   return (
     <div className="admin-layout">

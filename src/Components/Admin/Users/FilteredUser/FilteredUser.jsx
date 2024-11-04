@@ -28,8 +28,8 @@ function FilteredUser({
             {users.map((user, index) => (
               <tr key={user.id}>
                 <th scope="row">{user.id}</th>
-                <td>{user.firstname}</td>
-                <td>{user.lastname}</td>
+                <td>{user.firstName}</td>
+                <td>{user.lastName}</td>
                 <td>{user.email}</td>
                 <td>
                   {showPasswordId === user.id ? (

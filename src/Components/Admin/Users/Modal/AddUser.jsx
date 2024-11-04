@@ -1,11 +1,8 @@
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
-import { addUser, updateUser } from "../../../../features/Users/userSlice";
 
 function AddUser({ id, singleuser, mode, onSave }) {
-  const dispatch = useDispatch();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -13,27 +10,26 @@ function AddUser({ id, singleuser, mode, onSave }) {
   }, [singleuser]);
 
   const validationSchema = Yup.object({
-    firstname: Yup.string().required("First Name is required"),
-    lastname: Yup.string().required("Last Name is required"),
-    email: Yup.string().email("Invalid email address").required("Email is required"),
-    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+    firstName: Yup.string().required("First Name is required"),
+    lastName: Yup.string().required("Last Name is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
   });
 
   const formik = useFormik({
     initialValues: {
-      firstname: mode === "update" && user ? user.firstname : "",
-      lastname: mode === "update" && user ? user.lastname : "",
+      firstName: mode === "update" && user ? user.firstName : "",
+      lastName: mode === "update" && user ? user.lastName : "",
       email: mode === "update" && user ? user.email : "",
       password: mode === "update" && user ? user.password : "",
     },
-    enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
-      if (mode === "update" && user) {
-        dispatch(updateUser({ id: user.id, ...values })).then(onSave); 
-      } else {
-        dispatch(addUser(values)).then(onSave); 
-      }
+      onSave({ ...values, id: user?.id }, mode);
     },
   });
 
@@ -64,29 +60,41 @@ function AddUser({ id, singleuser, mode, onSave }) {
                 <div className="col-md-6 col-12">
                   <input
                     type="text"
-                    name="firstname"
+                    name="firstName"
                     placeholder="First Name*"
-                    className={`input ${formik.touched.firstname && formik.errors.firstname ? "border-danger" : ""}`}
+                    className={`input ${
+                      formik.touched.firstame && formik.errors.firstName
+                        ? "border-danger"
+                        : ""
+                    }`}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.firstname}
+                    value={formik.values.firstName}
                   />
-                  {formik.touched.firstname && formik.errors.firstname && (
-                    <div className="text-danger small mt-1">{formik.errors.firstname}</div>
+                  {formik.touched.firstName && formik.errors.firstName && (
+                    <div className="text-danger small mt-1">
+                      {formik.errors.firstName}
+                    </div>
                   )}
                 </div>
                 <div className="col-md-6 col-12">
                   <input
                     type="text"
-                    name="lastname"
+                    name="lastName"
                     placeholder="Last Name*"
-                    className={`input ${formik.touched.lastname && formik.errors.lastname ? "border-danger" : ""}`}
+                    className={`input ${
+                      formik.touched.lastName && formik.errors.lastName
+                        ? "border-danger"
+                        : ""
+                    }`}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.lastname}
+                    value={formik.values.lastName}
                   />
-                  {formik.touched.lastname && formik.errors.lastname && (
-                    <div className="text-danger small mt-1">{formik.errors.lastname}</div>
+                  {formik.touched.lastName && formik.errors.lastName && (
+                    <div className="text-danger small mt-1">
+                      {formik.errors.lastName}
+                    </div>
                   )}
                 </div>
                 <div className="col-12">
@@ -94,13 +102,19 @@ function AddUser({ id, singleuser, mode, onSave }) {
                     type="email"
                     name="email"
                     placeholder="Email*"
-                    className={`input ${formik.touched.email && formik.errors.email ? "border-danger" : ""}`}
+                    className={`input ${
+                      formik.touched.email && formik.errors.email
+                        ? "border-danger"
+                        : ""
+                    }`}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.email}
                   />
                   {formik.touched.email && formik.errors.email && (
-                    <div className="text-danger small mt-1">{formik.errors.email}</div>
+                    <div className="text-danger small mt-1">
+                      {formik.errors.email}
+                    </div>
                   )}
                 </div>
                 <div className="col-12">
@@ -108,18 +122,26 @@ function AddUser({ id, singleuser, mode, onSave }) {
                     type="password"
                     name="password"
                     placeholder="Set a Password*"
-                    className={`input ${formik.touched.password && formik.errors.password ? "border-danger" : ""}`}
+                    className={`input ${
+                      formik.touched.password && formik.errors.password
+                        ? "border-danger"
+                        : ""
+                    }`}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.password}
                   />
                   {formik.touched.password && formik.errors.password && (
-                    <div className="text-danger small mt-1">{formik.errors.password}</div>
+                    <div className="text-danger small mt-1">
+                      {formik.errors.password}
+                    </div>
                   )}
                 </div>
               </div>
               <div className="d-flex justify-content-end pt-3">
-                <button type="submit" className="btn">Save changes</button>
+                <button type="submit" className="btn">
+                  Save changes
+                </button>
               </div>
             </form>
           </div>
