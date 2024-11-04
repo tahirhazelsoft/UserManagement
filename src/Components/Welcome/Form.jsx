@@ -4,12 +4,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./Welcome.css";
 import { useDispatch, useSelector } from "react-redux";
-import { addUser, authenticateUser } from "../../features/Users/userSlice";
+// import { addUser, authenticateUser } from "../../features/Users/userSlice";
 
 function Form({ type }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const authenticatedUser = useSelector((state) => state.users.LoggedInUser);
+  // const authenticatedUser = useSelector((state) => state.users.LoggedInUser);
 
   const validationSchema = Yup.object({
     firstname: type === "signup" ? Yup.string().required("First Name is required") : Yup.string(),

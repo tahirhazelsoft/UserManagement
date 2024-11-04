@@ -19,16 +19,25 @@
   background-color: rgba(7, 158, 146, 0.541);
 }
 
-.pagination{
-  display: flex;
-  justify-content: space-between;
-}
-.add-user>button, .search>button, .dropdown > button, .pagination > button{
+
+.add-user>button, .search>button, .dropdown > button, .pagination > button, .pages>button{
   outline: none;
   border: none;
   background-color: rgb(7, 158, 146);
   color: #fff;
   padding: 0.5rem 1rem;
+}
+
+.pagination > button,.pages>button{
+  outline: none;
+  border: none;
+  background-color: rgb(7, 158, 146);
+  color: #fff;
+  padding: 0.3rem 0.7rem;
+}
+.pages >:nth-child(2){
+  background-color: rgb(4, 69, 129);
+  
 }
 
 

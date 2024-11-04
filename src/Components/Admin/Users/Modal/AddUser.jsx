@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 
 function AddUser({ id, singleuser, mode, onSave }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(singleuser);
 
   useEffect(() => {
     setUser(singleuser);
@@ -28,6 +28,7 @@ function AddUser({ id, singleuser, mode, onSave }) {
       password: mode === "update" && user ? user.password : "",
     },
     validationSchema,
+    enableReinitialize: true, 
     onSubmit: (values) => {
       onSave({ ...values, id: user?.id }, mode);
     },
@@ -63,7 +64,7 @@ function AddUser({ id, singleuser, mode, onSave }) {
                     name="firstName"
                     placeholder="First Name*"
                     className={`input ${
-                      formik.touched.firstame && formik.errors.firstName
+                      formik.touched.firstName && formik.errors.firstName
                         ? "border-danger"
                         : ""
                     }`}

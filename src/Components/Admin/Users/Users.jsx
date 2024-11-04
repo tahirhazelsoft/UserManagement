@@ -2,65 +2,49 @@ import React, { useState, useEffect } from "react";
 import "../CSS/Admin.css";
 import AddUser from "./Modal/AddUser";
 import FilteredUser from "./FilteredUser/FilteredUser";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchUsers,
-  deleteUser,
-  updateUser,
-  addUser,
-} from "../../../Services/UserService";
-import { Link } from "react-router-dom";
+  fetchUsersAsync,
+  addUserAsync,
+  deleteUserAsync,
+  updateUserAsync,
+  searchUser,
+  UsersInAscendingOrder,
+  UsersInDescendingOrder,
+} from "../../../features/Users/userSlice";
 
 function Users() {
-  const [users, setUsers] = useState([]);
-  const [searchedUsers, setSearchedUsers] = useState([]);
+  const dispatch = useDispatch();
+  const users = useSelector((state) => state.users.users);
+  const loading = useSelector((state) => state.users.loading);
+  const error = useSelector((state) => state.users.error);
+  const searchedUsers = useSelector((state) => state.users.searchResult);
+
   const [user, setUser] = useState(null);
   const [showPasswordId, setShowPasswordId] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sortedUsers, setSortedUsers] = useState([]);
-  const [monitorUsers, setMonitorUsers] = useState({
-    start: 0,
-    end: 5,
-  });
+  const [monitorUsers, setMonitorUsers] = useState({ start: 0, end: 5 });
   const [activePage, setActivePage] = useState(1);
-  const allPages = Math.round(users.length / 5);
-
-  console.log(allPages);
 
   useEffect(() => {
-    handleFetchUsers();
-  }, []);
-
-  const handleFetchUsers = async () => {
-    setLoading(true);
-    const users = await fetchUsers();
-    setUsers(users);
-    setSortedUsers(users);
-    setLoading(false);
-  };
+    dispatch(fetchUsersAsync());
+  }, [dispatch]);
 
   useEffect(() => {
     if (search) {
-      setLoading(true);
-      const filtered = users.filter((user) =>
-        user.firstName.toLowerCase().includes(search.toLowerCase())
-      );
-      setSearchedUsers(filtered);
-      setLoading(false);
-    } else {
-      setSearchedUsers([]);
+      dispatch(searchUser(search));
     }
-  }, [search, users]);
+  }, [search]);
+
+  const allPages = Math.ceil(users.length / 5);
 
   const handleShowPassword = (id) => {
     setShowPasswordId((prevId) => (prevId === id ? null : id));
   };
 
   const handleDelete = async (id) => {
-    await deleteUser(id);
-    setUsers(users.filter((user) => user.id !== id));
-    setSortedUsers(users.filter((user) => user.id !== id));
+    dispatch(deleteUserAsync(id));
   };
 
   const handleUpdate = (id) => {
@@ -69,17 +53,11 @@ function Users() {
     setIsUpdating(true);
   };
 
-  const saveUser = async (newUser, mode) => {
+  const saveUser = (newUser, mode) => {
     if (mode === "update") {
-      const updatedUser = await updateUser(newUser);
-      setUsers(users.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-      setSortedUsers(
-        users.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-      );
+      dispatch(updateUserAsync(newUser));
     } else {
-      const addedUser = await addUser(newUser);
-      setUsers([addedUser, ...users]);
-      setSortedUsers([addedUser, ...users]);
+      dispatch(addUserAsync(newUser));
     }
     setUser(null);
     setIsUpdating(false);
@@ -90,13 +68,11 @@ function Users() {
   };
 
   const handleSortAscending = () => {
-    const sorted = [...users].sort((a, b) => a.id - b.id);
-    setSortedUsers(sorted);
+    dispatch(UsersInAscendingOrder());
   };
 
   const handleSortDescending = () => {
-    const sorted = [...users].sort((a, b) => b.id - a.id);
-    setSortedUsers(sorted);
+    dispatch(UsersInDescendingOrder());
   };
 
   const handleNext = () => {
@@ -104,7 +80,7 @@ function Users() {
       start: monitorUsers.start + 5,
       end: monitorUsers.end + 5,
     });
-    setActivePage((pre) => pre + 1);
+    setActivePage((prev) => prev + 1);
   };
 
   const handlePrevious = () => {
@@ -112,7 +88,7 @@ function Users() {
       start: monitorUsers.start - 5 < 0 ? 0 : monitorUsers.start - 5,
       end: monitorUsers.end - 5 < 5 ? 5 : monitorUsers.end - 5,
     });
-    setActivePage((pre) => pre - 1);
+    setActivePage((prev) => prev - 1);
   };
 
   return (
@@ -186,7 +162,7 @@ function Users() {
             users={
               search
                 ? searchedUsers
-                : sortedUsers.slice(monitorUsers.start, monitorUsers.end)
+                : users.slice(monitorUsers.start, monitorUsers.end)
             }
             showPasswordId={showPasswordId}
             handleShowPassword={handleShowPassword}
@@ -194,7 +170,7 @@ function Users() {
             handleUpdate={handleUpdate}
           />
         )}
-        <div className="pagination">
+        <div className="pagination flex justify-content-between align-items-center">
           <button onClick={handlePrevious} disabled={monitorUsers.start === 0}>
             Previous
           </button>
@@ -213,7 +189,7 @@ function Users() {
               className="LastPage"
               onClick={() => {
                 setMonitorUsers({
-                  start: Math.floor(users.length / 5) * 5,
+                  start: users.length - 5,
                   end: users.length,
                 });
                 setActivePage(allPages);
@@ -224,7 +200,7 @@ function Users() {
           </div>
           <button
             onClick={handleNext}
-            disabled={monitorUsers.end > users.length}
+            disabled={monitorUsers.end >= users.length}
           >
             Next
           </button>
