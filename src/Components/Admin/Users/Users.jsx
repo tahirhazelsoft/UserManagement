@@ -9,16 +9,20 @@ import {
   deleteUserAsync,
   updateUserAsync,
   searchUser,
-  UsersInAscendingOrder,
-  UsersInDescendingOrder,
-} from "../../../features/Users/userSlice";
+  sortUsersAscending,
+  sortUsersDescending,
+} from "../../../Redux/Actions/userActions"; // Adjusted to import from the correct path
 
 function Users() {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.users.users);
-  const loading = useSelector((state) => state.users.loading);
-  const error = useSelector((state) => state.users.error);
-  const searchedUsers = useSelector((state) => state.users.searchResult);
+  const users = useSelector((state) => state.user.users); 
+  const loading = useSelector((state) => state.user.loading);
+  const error = useSelector((state) => state.user.error);
+  const searchedUsers = useSelector((state) => state.user.searchResult);
+
+  useEffect(() => {
+    console.log("Current users in Redux store:", users); // Log users
+}, [users]);
 
   const [user, setUser] = useState(null);
   const [showPasswordId, setShowPasswordId] = useState(null);
@@ -34,8 +38,11 @@ function Users() {
   useEffect(() => {
     if (search) {
       dispatch(searchUser(search));
+    } else {
+      // If search is cleared, reset the search result
+      dispatch(searchUser(""));
     }
-  }, [search]);
+  }, [search, dispatch]);
 
   const allPages = Math.ceil(users.length / 5);
 
@@ -44,7 +51,7 @@ function Users() {
   };
 
   const handleDelete = async (id) => {
-    dispatch(deleteUserAsync(id));
+    await dispatch(deleteUserAsync(id)); // Await the delete action
   };
 
   const handleUpdate = (id) => {
@@ -68,27 +75,27 @@ function Users() {
   };
 
   const handleSortAscending = () => {
-    dispatch(UsersInAscendingOrder());
+    dispatch(sortUsersAscending());
   };
 
   const handleSortDescending = () => {
-    dispatch(UsersInDescendingOrder());
+    dispatch(sortUsersDescending());
   };
 
   const handleNext = () => {
-    setMonitorUsers({
-      start: monitorUsers.start + 5,
-      end: monitorUsers.end + 5,
-    });
-    setActivePage((prev) => prev + 1);
+    setMonitorUsers((prev) => ({
+      start: prev.start + 5,
+      end: prev.end + 5 > users.length ? users.length : prev.end + 5,
+    }));
+    setActivePage((prev) => Math.min(prev + 1, allPages)); // Prevent exceeding max pages
   };
 
   const handlePrevious = () => {
-    setMonitorUsers({
-      start: monitorUsers.start - 5 < 0 ? 0 : monitorUsers.start - 5,
-      end: monitorUsers.end - 5 < 5 ? 5 : monitorUsers.end - 5,
-    });
-    setActivePage((prev) => prev - 1);
+    setMonitorUsers((prev) => ({
+      start: Math.max(prev.start - 5, 0),
+      end: prev.end - 5 < 5 ? 5 : prev.end - 5,
+    }));
+    setActivePage((prev) => Math.max(prev - 1, 1)); // Prevent going below 1
   };
 
   return (
@@ -98,7 +105,7 @@ function Users() {
       </header>
       <hr />
       <main className="d-flex flex-column">
-        <div className="add-button w-100 text-end d-flex justify-content-center gap-2 flex-sm-row flex-column justify-content-sm-end ">
+        <div className="add-button w-100 text-end d-flex justify-content-center gap-2 flex-sm-row flex-column justify-content-sm-end">
           <div className="search d-flex justify-content-end">
             <input
               type="text"
@@ -116,7 +123,7 @@ function Users() {
           <div className="filter">
             <div className="dropdown">
               <button
-                className=" dropdown-toggle"
+                className="dropdown-toggle"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
@@ -170,6 +177,7 @@ function Users() {
             handleUpdate={handleUpdate}
           />
         )}
+        {error && <div className="error">{error}</div>} {/* Display error if exists */}
         <div className="pagination flex justify-content-between align-items-center">
           <button onClick={handlePrevious} disabled={monitorUsers.start === 0}>
             Previous

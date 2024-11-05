@@ -4,17 +4,26 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./Welcome.css";
 import { useDispatch, useSelector } from "react-redux";
-// import { addUser, authenticateUser } from "../../features/Users/userSlice";
+import { loggedInUserAsync, logoutUserAsync } from "../../Redux/Actions/userActions";
 
 function Form({ type }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const authenticatedUser = useSelector((state) => state.users.LoggedInUser);
+  const { loggedInUser } = useSelector((state) => state.user);
 
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token && loggedInUser) {
+      dispatch(logoutUserAsync());
+      navigate("/");
+    } else if (loggedInUser) {
+      navigate("/admin");
+    }
+  }, [loggedInUser, navigate, dispatch]);
   const validationSchema = Yup.object({
     firstname: type === "signup" ? Yup.string().required("First Name is required") : Yup.string(),
     lastname: type === "signup" ? Yup.string().required("Last Name is required") : Yup.string(),
-    email: Yup.string().email("Invalid email address").required("Email is required"),
+    // email: Yup.string().email("Invalid email address").required("Email is required"),
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   });
 
@@ -28,7 +37,7 @@ function Form({ type }) {
     validationSchema,
     onSubmit: (values) => {
       if (type === "login") {
-        dispatch(authenticateUser({ email: values.email, password: values.password }));
+        dispatch(loggedInUserAsync(values.email, values.password));
       } else {
         dispatch(addUser(values));
       }
@@ -37,10 +46,10 @@ function Form({ type }) {
 
   // Redirect to admin if login successful
   useEffect(() => {
-    if (authenticatedUser.length > 0) {
+    if (loggedInUser && loggedInUser.email) {
       navigate("/admin");
     }
-  }, [authenticatedUser, navigate]);
+  }, [loggedInUser, navigate]);
 
   return (
     <section className="form">
@@ -83,7 +92,7 @@ function Form({ type }) {
         <div className="login-reg d-flex flex-column gap-3">
           <div className="email">
             <input
-              type="email"
+              type="text"
               name="email"
               placeholder="Email*"
               className={`w-100 ${formik.touched.email && formik.errors.email ? "border-danger" : ""}`}

@@ -1,36 +1,55 @@
-// services.js
+import axios from "axios";
+
 const BASE_URL = "https://dummyjson.com/users";
 
 export const fetchUsers = async () => {
-  const response = await fetch(`${BASE_URL}?limit=0&select=firstName,lastName,email,password`);
-  const data = await response.json();
-  return data.users;
+  try {
+    const response = await axios.get(`${BASE_URL}`, {
+      params: {
+        limit: 0,
+        select: "firstName,lastName,email,password",
+      },
+    });
+    return response.data.users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
 };
 
 export const deleteUser = async (id) => {
-  await fetch(`${BASE_URL}/${id}`, {
-    method: "DELETE",
-  });
+  try {
+    await axios.delete(`${BASE_URL}/${id}`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
 };
 
 export const updateUser = async (user) => {
-  const response = await fetch(`${BASE_URL}/${user.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(user),
-  });
-  return await response.json();
+  try {
+    const response = await axios.put(`${BASE_URL}/${user.id}`, user, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
 };
 
 export const addUser = async (user) => {
-  const response = await fetch(`${BASE_URL}/add`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(user),
-  });
-  return await response.json();
+  try {
+    const response = await axios.post(`${BASE_URL}/add`, user, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding user:", error);
+    throw error;
+  }
 };
