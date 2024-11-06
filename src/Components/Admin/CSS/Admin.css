@@ -28,22 +28,70 @@
   padding: 0.5rem 1rem;
 }
 
-.pagination > button,.pages>button{
+/* .pagination > button,.pages>button{
   outline: none;
   border: none;
   background-color: rgb(7, 158, 146);
   color: #fff;
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
 }
-.pages >:nth-child(2){
+
+
+
+.page-number.active {
   background-color: rgb(4, 69, 129);
-  
+  color: white;
+} */
+
+
+.pagination {
+  list-style: none;
+  align-self: center;
+  width: min-content;
 }
 
 
-.buttons>button.active {
+.page-item  {
+  margin: 0 1px;
+  border: 0;
+  border-radius: 0;
+}
+.page-item:last-child{
+  border-radius: 0;
+}
+
+
+.page-link {
+  padding: 0.3rem 0.6rem;
+  color: #fff;
   background-color: rgb(7, 158, 146);
+  text-decoration: none;
+  border: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+.page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.active-page > .page-link {
+  background-color: rgb(4, 69, 129) !important;
+  color: #fff;
+  font-weight: bold;
+}
+
+.page-item.disabled .page-link {
+  color: #ccc;
+  pointer-events: none;
+  border-color: #ccc;
+}
+
+
+
+
+
 .search>input{
   outline: none;
   border: none;

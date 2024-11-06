@@ -1,9 +1,10 @@
+import { useSelector } from "react-redux";
 import {
   fetchUsers,
   deleteUser,
   updateUser,
   addUser,
-  LogInUser
+  LogInUser,
 } from "../Services/userServices";
 import toast from "react-hot-toast";
 
@@ -28,6 +29,7 @@ export const searchUser = (searchTerm) => ({
 
 export const sortUsersAscending = () => ({ type: SORT_USERS_ASC });
 export const sortUsersDescending = () => ({ type: SORT_USERS_DESC });
+export const LogoutUser = ()=>({type:LOGOUT_USER})
 
 
 // Thunk actions
@@ -90,20 +92,16 @@ export const loggedInUserAsync = (email, password) => async (dispatch) => {
   try {
     const user = await LogInUser(email, password);
     dispatch({ type: AUTHENTICATE_USER, payload: user });
-
-    // Set a timeout to log out the user after 5 minutes
-    setTimeout(() => {
-      dispatch(logoutUserAsync());
-    }, 300000); // 300,000 ms = 5 minutes
   } catch (error) {
     dispatch({ type: AUTHENTICATE_USER, payload: { error: error.message } });
   }
 };
 
-export const logoutUserAsync = () => {
-  return (dispatch) => {
-    localStorage.removeItem('authToken');
-    dispatch({ type: LOGOUT_USER });
-    toast.success("You have been logged out automatically.");
-  };
-};
+
+// export const logoutUserAsync = () => {
+//   return (dispatch) => {
+//     localStorage.removeItem("authToken");
+//     dispatch({ type: LOGOUT_USER });
+//     toast.success("You have been logged out automatically.");
+//   };
+// };

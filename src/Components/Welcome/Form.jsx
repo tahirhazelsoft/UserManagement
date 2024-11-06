@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./Welcome.css";
 import { useDispatch, useSelector } from "react-redux";
-import { loggedInUserAsync, logoutUserAsync } from "../../Redux/Actions/userActions";
+import { loggedInUserAsync } from "../../Redux/Actions/userActions";
 
 function Form({ type }) {
   const dispatch = useDispatch();
@@ -12,14 +12,12 @@ function Form({ type }) {
   const { loggedInUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token && loggedInUser) {
-      dispatch(logoutUserAsync());
-      navigate("/");
-    } else if (loggedInUser) {
+    console.log(loggedInUser)
+    if (loggedInUser) {
       navigate("/admin");
     }
-  }, [loggedInUser, navigate, dispatch]);
+  }, [loggedInUser, navigate]);
+
   const validationSchema = Yup.object({
     firstname: type === "signup" ? Yup.string().required("First Name is required") : Yup.string(),
     lastname: type === "signup" ? Yup.string().required("Last Name is required") : Yup.string(),
@@ -43,13 +41,6 @@ function Form({ type }) {
       }
     },
   });
-
-  // Redirect to admin if login successful
-  useEffect(() => {
-    if (loggedInUser && loggedInUser.email) {
-      navigate("/admin");
-    }
-  }, [loggedInUser, navigate]);
 
   return (
     <section className="form">

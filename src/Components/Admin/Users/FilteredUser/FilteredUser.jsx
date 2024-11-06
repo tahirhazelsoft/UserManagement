@@ -10,7 +10,9 @@ function FilteredUser({
   handleDelete,
   handleUpdate,
 }) {
+  console.log('User in filter Components', users)
   return (
+
     <div className="table-wrapper m-3">
       {users && users.length > 0 ? (
         <table className="table table-hover">

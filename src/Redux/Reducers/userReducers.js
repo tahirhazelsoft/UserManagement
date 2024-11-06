@@ -9,14 +9,16 @@ import {
   ADD_USER,
   DELETE_USER,
   UPDATE_USER,
-  LOGOUT_USER
+  LOGOUT_USER,
 } from "../Actions/userActions";
 import toast from "react-hot-toast";
 
 const initialState = {
   users: [],
   searchResult: [],
-  loggedInUser: null,
+  loggedInUser: localStorage.getItem("loggedInUser")
+    ? JSON.parse(localStorage.getItem("loggedInUser"))
+    : null,
   loading: false,
   error: null,
 };
@@ -25,14 +27,16 @@ const userReducer = (state = initialState, action) => {
   switch (action.type) {
     case SEARCH_USER:
       const searchTerm = action.payload.toLowerCase();
+
       return {
         ...state,
         searchResult: searchTerm
-          ? state.users.filter((user) =>
-              user.firstName.toLowerCase().includes(searchTerm)
-            )
-          : [],
+        ? state.users.filter((user) =>
+            user.firstName.toLowerCase() === searchTerm
+          )
+        : []
       };
+      
 
     case SORT_USERS_ASC:
       return {
@@ -49,13 +53,17 @@ const userReducer = (state = initialState, action) => {
     case AUTHENTICATE_USER:
       if (action.payload.error) {
         toast.error("Invalid email or password!");
-        return { ...state, loggedInUser: [], error: action.payload.error };
+        return { ...state, loggedInUser: null, error: action.payload.error };
       } else {
         const authenticatedUser = action.payload;
+        console.log(authenticatedUser);
         toast.success("Login successful!");
+        localStorage.setItem("loggedInUser", JSON.stringify(authenticatedUser));
         return { ...state, loggedInUser: authenticatedUser };
       }
     case LOGOUT_USER:
+      toast.success("Logout successful!");
+      localStorage.removeItem("loggedInUser");
       return {
         ...state,
         loggedInUser: null,

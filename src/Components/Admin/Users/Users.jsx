@@ -11,25 +11,28 @@ import {
   searchUser,
   sortUsersAscending,
   sortUsersDescending,
-} from "../../../Redux/Actions/userActions"; // Adjusted to import from the correct path
+} from "../../../Redux/Actions/userActions";
+import Pagination from "react-js-pagination";
 
 function Users() {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.user.users); 
+  const users = useSelector((state) => state.user.users);
   const loading = useSelector((state) => state.user.loading);
   const error = useSelector((state) => state.user.error);
   const searchedUsers = useSelector((state) => state.user.searchResult);
-
-  useEffect(() => {
-    console.log("Current users in Redux store:", users); // Log users
-}, [users]);
-
   const [user, setUser] = useState(null);
   const [showPasswordId, setShowPasswordId] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [search, setSearch] = useState("");
-  const [monitorUsers, setMonitorUsers] = useState({ start: 0, end: 5 });
-  const [activePage, setActivePage] = useState(1);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  console.log(`Searched users are on User Components`, searchedUsers)
+  const allUsers = search ? searchedUsers : users;
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = currentPage * itemsPerPage;
+  const displayedUsers = allUsers.slice(start, end);
+  
 
   useEffect(() => {
     dispatch(fetchUsersAsync());
@@ -39,19 +42,16 @@ function Users() {
     if (search) {
       dispatch(searchUser(search));
     } else {
-      // If search is cleared, reset the search result
       dispatch(searchUser(""));
     }
   }, [search, dispatch]);
-
-  const allPages = Math.ceil(users.length / 5);
 
   const handleShowPassword = (id) => {
     setShowPasswordId((prevId) => (prevId === id ? null : id));
   };
 
   const handleDelete = async (id) => {
-    await dispatch(deleteUserAsync(id)); // Await the delete action
+    dispatch(deleteUserAsync(id));
   };
 
   const handleUpdate = (id) => {
@@ -82,20 +82,8 @@ function Users() {
     dispatch(sortUsersDescending());
   };
 
-  const handleNext = () => {
-    setMonitorUsers((prev) => ({
-      start: prev.start + 5,
-      end: prev.end + 5 > users.length ? users.length : prev.end + 5,
-    }));
-    setActivePage((prev) => Math.min(prev + 1, allPages)); // Prevent exceeding max pages
-  };
-
-  const handlePrevious = () => {
-    setMonitorUsers((prev) => ({
-      start: Math.max(prev.start - 5, 0),
-      end: prev.end - 5 < 5 ? 5 : prev.end - 5,
-    }));
-    setActivePage((prev) => Math.max(prev - 1, 1)); // Prevent going below 1
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -130,7 +118,6 @@ function Users() {
               >
                 Filter
               </button>
-
               <ul className="dropdown-menu">
                 <li>
                   <button
@@ -163,56 +150,29 @@ function Users() {
           </div>
         </div>
         {loading ? (
-          <div className="loading">Loading...</div>
+          <div className="loading ">Loading...</div>
         ) : (
           <FilteredUser
-            users={
-              search
-                ? searchedUsers
-                : users.slice(monitorUsers.start, monitorUsers.end)
-            }
+            users={displayedUsers}
             showPasswordId={showPasswordId}
             handleShowPassword={handleShowPassword}
             handleDelete={handleDelete}
             handleUpdate={handleUpdate}
           />
         )}
-        {error && <div className="error">{error}</div>} {/* Display error if exists */}
-        <div className="pagination flex justify-content-between align-items-center">
-          <button onClick={handlePrevious} disabled={monitorUsers.start === 0}>
-            Previous
-          </button>
-          <div className="pages">
-            <button
-              className="FirstPage"
-              onClick={() => {
-                setMonitorUsers({ start: 0, end: 5 });
-                setActivePage(1);
-              }}
-            >
-              1
-            </button>
-            <button className="ActivePage">{activePage}</button>
-            <button
-              className="LastPage"
-              onClick={() => {
-                setMonitorUsers({
-                  start: users.length - 5,
-                  end: users.length,
-                });
-                setActivePage(allPages);
-              }}
-            >
-              {allPages}
-            </button>
-          </div>
-          <button
-            onClick={handleNext}
-            disabled={monitorUsers.end >= users.length}
-          >
-            Next
-          </button>
-        </div>
+        {error && <div className="error">{error}</div>}
+
+        <Pagination
+          activePage={currentPage}
+          itemsCountPerPage={itemsPerPage}
+          totalItemsCount={allUsers.length}
+          pageRangeDisplayed={5} //how much page display?
+          onChange={handlePageChange}
+          innerClass="pagination d-flex justify-content-center mt-4"
+          activeClass="active-page"
+          itemClass="page-item"
+          linkClass="page-link"
+        />
       </main>
 
       <AddUser id={"addUserModal"} mode={"add"} onSave={saveUser} />
