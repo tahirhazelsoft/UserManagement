@@ -1,12 +1,12 @@
 import React from 'react'
-import { LogoutUser } from '../../../Redux/Actions/userActions'
+import { logoutUser } from '../../../Redux/Actions/userActions'
 import { useDispatch } from 'react-redux'
 
 function WelcomeAdmin() {
   const dispatch = useDispatch()
   const handleLogout = ()=>{
     console.log("Logging out")
-    dispatch(LogoutUser())
+    dispatch(logoutUser())
   }
   return (
     <div>

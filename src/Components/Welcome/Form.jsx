@@ -4,7 +4,11 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./Welcome.css";
 import { useDispatch, useSelector } from "react-redux";
-import { loggedInUserAsync } from "../../Redux/Actions/userActions";
+import {
+  loggedInUserAsync,
+  addUserAsync,
+} from "../../Redux/Actions/userActions";
+import Input from "../../Shared/Components/Input/Input";
 
 function Form({ type }) {
   const dispatch = useDispatch();
@@ -12,7 +16,6 @@ function Form({ type }) {
   const { loggedInUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    console.log(loggedInUser)
     if (loggedInUser) {
       navigate("/admin");
     }
@@ -21,7 +24,7 @@ function Form({ type }) {
   const validationSchema = Yup.object({
     firstname: type === "signup" ? Yup.string().required("First Name is required") : Yup.string(),
     lastname: type === "signup" ? Yup.string().required("Last Name is required") : Yup.string(),
-    // email: Yup.string().email("Invalid email address").required("Email is required"),
+    email: Yup.string().required("Email is required"),
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   });
 
@@ -37,7 +40,7 @@ function Form({ type }) {
       if (type === "login") {
         dispatch(loggedInUserAsync(values.email, values.password));
       } else {
-        dispatch(addUser(values));
+        dispatch(addUserAsync(values));
       }
     },
   });
@@ -51,7 +54,7 @@ function Form({ type }) {
         {type === "signup" && (
           <div className="row g-1">
             <div className="col-md-6 col-12">
-              <input
+              <Input
                 type="text"
                 name="firstname"
                 placeholder="First Name*"
@@ -59,13 +62,12 @@ function Form({ type }) {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.firstname}
+                error={formik.errors.firstname}
+                touched={formik.touched.firstname}
               />
-              {formik.touched.firstname && formik.errors.firstname ? (
-                <div className="text-danger error">{formik.errors.firstname}</div>
-              ) : null}
             </div>
             <div className="col-md-6 col-12">
-              <input
+              <Input
                 type="text"
                 name="lastname"
                 placeholder="Last Name*"
@@ -73,16 +75,15 @@ function Form({ type }) {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.lastname}
+                error={formik.errors.lastname}
+                touched={formik.touched.lastname}
               />
-              {formik.touched.lastname && formik.errors.lastname ? (
-                <div className="text-danger error">{formik.errors.lastname}</div>
-              ) : null}
             </div>
           </div>
         )}
         <div className="login-reg d-flex flex-column gap-3">
           <div className="email">
-            <input
+            <Input
               type="text"
               name="email"
               placeholder="Email*"
@@ -90,13 +91,12 @@ function Form({ type }) {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.email}
+              error={formik.errors.email}
+              touched={formik.touched.email}
             />
-            {formik.touched.email && formik.errors.email ? (
-              <div className="text-danger error">{formik.errors.email}</div>
-            ) : null}
           </div>
           <div className="password">
-            <input
+            <Input
               type="password"
               name="password"
               placeholder={type === "login" ? "Password*" : "Set a Password*"}
@@ -104,14 +104,15 @@ function Form({ type }) {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.password}
+              error={formik.errors.password}
+              touched={formik.touched.password}
             />
-            {formik.touched.password && formik.errors.password ? (
-              <div className="text-danger error">{formik.errors.password}</div>
-            ) : null}
           </div>
         </div>
         <div className="submit-button d-flex justify-content-end">
-          {type === "login" && <Link to="/forgot-password">Forget Password?</Link>}
+          {type === "login" && (
+            <Link to="/forgot-password">Forget Password?</Link>
+          )}
         </div>
         <div className="submit-button">
           <button type="submit" className="btn btn-primary">

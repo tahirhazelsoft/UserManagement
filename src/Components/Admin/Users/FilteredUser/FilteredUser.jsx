@@ -10,7 +10,7 @@ function FilteredUser({
   handleDelete,
   handleUpdate,
 }) {
-  console.log('User in filter Components', users)
+
   return (
 
     <div className="table-wrapper m-3">
