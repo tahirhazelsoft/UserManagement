@@ -31,7 +31,12 @@ export const searchUser = (searchTerm) => ({
 export const sortUsersAscending = () => ({ type: SORT_USERS_ASC });
 export const sortUsersDescending = () => ({ type: SORT_USERS_DESC });
 export const logoutUser = () => ({ type: LOGOUT_USER });
-export const clearError = () => ({ type: CLEAR_ERROR });
+// Action creator to clear specific error
+export const clearError = (key) => ({
+  type: CLEAR_ERROR,
+  payload: key,
+});
+
 
 // Helper functions for loading and error state
 const setLoading = (key, status) => ({
@@ -71,28 +76,60 @@ export const deleteUserAsync = (id) => async (dispatch) => {
   }
 };
 
-export const updateUserAsync = (user) => async (dispatch) => {
+// export const updateUserAsync = (user) => async (dispatch) => {
+//   dispatch(setLoading("updateUser", true));
+//   try {
+//     const updatedUser = await updateUser(user);
+//     dispatch({ type: UPDATE_USER, payload: updatedUser });
+//     toast.success("User updated successfully.");
+//   } catch (error) {
+//     dispatch(setError("updateUser", error.message));
+//     toast.error("Error updating user.");
+//   } finally {
+//     dispatch(setLoading("updateUser", false));
+//   }
+// };
+
+// export const addUserAsync = (user) => async (dispatch) => {
+//   dispatch(setLoading("addUser", true));
+//   try {
+//     const newUser = await addUser(user);
+//     dispatch({ type: ADD_USER, payload: newUser });
+//     toast.success("User added successfully.");
+//   } catch (error) {
+//     dispatch(setError("addUser", error.message));
+//     toast.error("Error adding user.");
+//   } finally {
+//     dispatch(setLoading("addUser", false));
+//   }
+// };
+
+
+
+export const updateUserAsync = (user,success) => async (dispatch) => {
   dispatch(setLoading("updateUser", true));
   try {
     const updatedUser = await updateUser(user);
     dispatch({ type: UPDATE_USER, payload: updatedUser });
     toast.success("User updated successfully.");
+    success()
   } catch (error) {
-    dispatch(setError("updateUser", error.message));
+    dispatch(setError("updateUser", error.message)); // This sets the error in Redux
     toast.error("Error updating user.");
   } finally {
     dispatch(setLoading("updateUser", false));
   }
 };
 
-export const addUserAsync = (user) => async (dispatch) => {
+export const addUserAsync = (user,success) => async (dispatch) => {
   dispatch(setLoading("addUser", true));
   try {
     const newUser = await addUser(user);
     dispatch({ type: ADD_USER, payload: newUser });
     toast.success("User added successfully.");
+    success()
   } catch (error) {
-    dispatch(setError("addUser", error.message));
+    dispatch(setError("addUser", error.message)); // This sets the error in Redux
     toast.error("Error adding user.");
   } finally {
     dispatch(setLoading("addUser", false));

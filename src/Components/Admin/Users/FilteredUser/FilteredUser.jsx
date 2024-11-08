@@ -9,10 +9,14 @@ function FilteredUser({
   handleShowPassword,
   handleDelete,
   handleUpdate,
+  setIsOpen,
+
 }) {
-
+  const handleUpdateUser = (id) => {
+    handleUpdate(id); 
+    // setIsOpen(true); 
+  };
   return (
-
     <div className="table-wrapper m-3">
       {users && users.length > 0 ? (
         <table className="table table-hover">
@@ -58,20 +62,18 @@ function FilteredUser({
                 </td>
                 <td className="">
                   <div className="d-flex justify-content-center gap-1">
-                  <img
-                    src={updateIcon}
-                    alt="update"
-                    width={25}
-                    onClick={() => handleUpdate(user.id)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#updateUserModal"
-                  />
-                  <img
-                    src={deleteIcon}
-                    alt="delete"
-                    width={25}
-                    onClick={() => handleDelete(user.id)}
-                  />
+                    <img
+                      src={updateIcon}
+                      alt="update"
+                      width={25}
+                      onClick={() => handleUpdateUser(user.id)}
+                    />
+                    <img
+                      src={deleteIcon}
+                      alt="delete"
+                      width={25}
+                      onClick={() => handleDelete(user.id)}
+                    />
                   </div>
                 </td>
               </tr>

@@ -67,10 +67,6 @@ export const LogInUser = async (email, password) => {
         withCredentials: true, 
       }
     );
-    // console.log("Token Data: ", response.data);
-    // const token = response.data.accessToken;
-    // localStorage.setItem("authToken", token);
-
     return response.data;
   } catch (error) {
     console.error("Error logging in user:", error);
