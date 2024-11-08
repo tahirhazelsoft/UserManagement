@@ -37,8 +37,6 @@ export const clearError = (key) => ({
   payload: key,
 });
 
-
-// Helper functions for loading and error state
 const setLoading = (key, status) => ({
   type: SET_LOADING,
   payload: { key, status },
@@ -55,8 +53,8 @@ export const fetchUsersAsync = () => async (dispatch) => {
     const users = await fetchUsers();
     dispatch({ type: SET_USERS, payload: users });
   } catch (error) {
-    dispatch(setError("fetchUser", error.message));
-    toast.error("Error fetching users.");
+    dispatch(setError("fetchUser", error.message)); 
+
   } finally {
     dispatch(setLoading("fetchUser", false));
   }
@@ -70,41 +68,11 @@ export const deleteUserAsync = (id) => async (dispatch) => {
     toast.success("User deleted successfully.");
   } catch (error) {
     dispatch(setError("deleteUser", error.message));
-    toast.error("Error deleting user.");
+    toast.error(error.response.data.message);
   } finally {
     dispatch(setLoading("deleteUser", false));
   }
 };
-
-// export const updateUserAsync = (user) => async (dispatch) => {
-//   dispatch(setLoading("updateUser", true));
-//   try {
-//     const updatedUser = await updateUser(user);
-//     dispatch({ type: UPDATE_USER, payload: updatedUser });
-//     toast.success("User updated successfully.");
-//   } catch (error) {
-//     dispatch(setError("updateUser", error.message));
-//     toast.error("Error updating user.");
-//   } finally {
-//     dispatch(setLoading("updateUser", false));
-//   }
-// };
-
-// export const addUserAsync = (user) => async (dispatch) => {
-//   dispatch(setLoading("addUser", true));
-//   try {
-//     const newUser = await addUser(user);
-//     dispatch({ type: ADD_USER, payload: newUser });
-//     toast.success("User added successfully.");
-//   } catch (error) {
-//     dispatch(setError("addUser", error.message));
-//     toast.error("Error adding user.");
-//   } finally {
-//     dispatch(setLoading("addUser", false));
-//   }
-// };
-
-
 
 export const updateUserAsync = (user,success) => async (dispatch) => {
   dispatch(setLoading("updateUser", true));
@@ -114,7 +82,7 @@ export const updateUserAsync = (user,success) => async (dispatch) => {
     toast.success("User updated successfully.");
     success()
   } catch (error) {
-    dispatch(setError("updateUser", error.message)); // This sets the error in Redux
+    dispatch(setError("updateUser", error)); 
     toast.error("Error updating user.");
   } finally {
     dispatch(setLoading("updateUser", false));
@@ -129,7 +97,7 @@ export const addUserAsync = (user,success) => async (dispatch) => {
     toast.success("User added successfully.");
     success()
   } catch (error) {
-    dispatch(setError("addUser", error.message)); // This sets the error in Redux
+    dispatch(setError("addUser", error)); 
     toast.error("Error adding user.");
   } finally {
     dispatch(setLoading("addUser", false));
@@ -142,6 +110,8 @@ export const loggedInUserAsync = (email, password) => async (dispatch) => {
     dispatch({ type: AUTHENTICATE_USER, payload: user });
   } catch (error) {
     dispatch({ type: AUTHENTICATE_USER, payload: { error: error.message } });
+    dispatch(setError("loggedinUser", error.response.data.message));
+    toast.error(error.response.data.message);
   }
 };
 

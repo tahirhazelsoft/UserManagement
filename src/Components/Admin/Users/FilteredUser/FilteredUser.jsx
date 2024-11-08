@@ -9,13 +9,8 @@ function FilteredUser({
   handleShowPassword,
   handleDelete,
   handleUpdate,
-  setIsOpen,
-
 }) {
-  const handleUpdateUser = (id) => {
-    handleUpdate(id); 
-    // setIsOpen(true); 
-  };
+
   return (
     <div className="table-wrapper m-3">
       {users && users.length > 0 ? (
@@ -66,7 +61,7 @@ function FilteredUser({
                       src={updateIcon}
                       alt="update"
                       width={25}
-                      onClick={() => handleUpdateUser(user.id)}
+                      onClick={() => handleUpdate(user.id)}
                     />
                     <img
                       src={deleteIcon}

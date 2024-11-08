@@ -17,7 +17,7 @@ function UserModal({ id, singleuser, mode, isOpen, closeModal }) {
     closeModal();
     formik.resetForm();
   }
-  // Formik setup
+
   const formik = useFormik({
     initialValues: {
       firstName: singleuser?.firstName || "",
@@ -124,13 +124,13 @@ function UserModal({ id, singleuser, mode, isOpen, closeModal }) {
 
               {/* Display error message from Redux */}
               {error.addUser && (
-                <div className="alert alert-danger mt-3">
+                <div className="text-danger">
                   <strong>Error:</strong> {error.addUser}
                 </div>
               )}
               {error.updateUser && (
-                <div className="alert alert-danger mt-3">
-                  <strong>Error:</strong> {error.updateUser}
+                <div className="text-danger">
+                  <strong>Error:</strong> {error.updateUser.response.data.message}
                 </div>
               )}
 
